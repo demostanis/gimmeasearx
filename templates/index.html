@@ -65,6 +65,10 @@ form {
 #config input[type=checkbox] {
 	vertical-align: -3px;
 }
+
+#config input[type=submit] {
+	margin-top: 20px;
+}
 	</style>
 </head>
 <body>
@@ -72,12 +76,12 @@ form {
 		<h3>Configuration panel</h3>
 		<form action="/">
 			<label for="tor">Tor instances</label>
-			<button>
-				<input name="tor"{{if .OptionsSelected.Tor}}checked{{end}} type="checkbox" type="submit"></button><br />
+			<input name="tor"{{if .OptionsSelected.Tor}}checked{{end}} type="checkbox"><br />
 
-			<label>Tor instances ONLY</label>
-			<button>
-				<input name="toronly"{{if .OptionsSelected.TorOnly}}checked{{end}} type="checkbox" type="submit"></button><br />
+			<label for="toronly">Tor instances ONLY</label>
+			<input name="toronly"{{if .OptionsSelected.TorOnly}}checked{{end}} type="checkbox"><br />
+
+			<input type="submit" value="Save"> 
 		</form>
 	</div>
 	<span id="main">
@@ -87,7 +91,7 @@ form {
 			<p>No instances available. Please try again in a few seconds.</p>
 		{{else}}
 			<form action="{{.InstanceUrl}}">
-				<input placeholder="Your query..." name="q" />
+				<input placeholder="Your query..." name="q">
 				<input type="submit" value="Search">
 			</form>
 			<i id="comments">{{.InstanceUrl}} {{range .Instance.Comments}}
