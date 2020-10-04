@@ -42,7 +42,11 @@ func main() {
 
 	e.GET("/", index)
 
-	e.Logger.Fatal(e.Start(":8080"))
+	port, exists := os.LookupEnv("PORT")
+	if !exists {
+		port = ":8080"
+	}
+	e.Logger.Fatal(e.Start(port))
 }
 
 func index(c echo.Context) error {
