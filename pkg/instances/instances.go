@@ -32,8 +32,12 @@ type InstancesData struct {
 type Instance struct {
 	Comments []string `json:"comments"`
 	NetworkType string `json:"network_type"`
-	Error string `json:"error,omit_empty"`
+	Error *string `json:"error,omit_empty"`
 	Version string `json:"version"`
+	Html struct {
+		Resources struct {} `json:"ressources"`
+		Grade string `json:"grade"`
+	} `json:"html,omit_empty"`
 }
 
 func InstancesNew(data io.ReadCloser) (*InstancesData, error) {

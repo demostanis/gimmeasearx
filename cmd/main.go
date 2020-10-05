@@ -56,10 +56,12 @@ func index(c echo.Context) error {
 	if fetchedInstances != nil {
 		keys := *new([]string)
 		for key, instance := range *fetchedInstances {
-			if torEnabled && instance.NetworkType == "tor" {
-				keys = append(keys, key)
-			} else if !torOnlyEnabled {
-				keys = append(keys, key)
+			if instance.Error == nil {
+				if torEnabled && instance.NetworkType == "tor" {
+					keys = append(keys, key)
+				} else if !torOnlyEnabled {
+					keys = append(keys, key)
+				}
 			}
 		}
 		randInt := rand.Intn(len(keys))
