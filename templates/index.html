@@ -115,9 +115,9 @@ form {
 			<i id="comments"><b>{{.InstanceUrl}}</b> {{range .Instance.Comments}}
 				{{.}}
 				{{end}} | grade: <div class="tooltip">
-					<b>&nbsp;{{.Instance.Html.Grade}}</b></i>
+					<b>{{.Instance.Html.Grade}}</b>
 					<span class="tooltiptext">{{.GradeComment}}</span>
-				</div>
+				</div></i>
 		{{end}}
 	</span>
 </body>
