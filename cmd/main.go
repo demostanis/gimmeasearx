@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/demostanis/gimmeasearx/pkg/grade"
 	"github.com/demostanis/gimmeasearx/pkg/instances"
 	"html/template"
 	"math/rand"
@@ -56,7 +57,7 @@ func index(c echo.Context) error {
 	if fetchedInstances != nil {
 		keys := *new([]string)
 		for key, instance := range *fetchedInstances {
-			if instance.Error == nil {
+			if instance.Error == nil && instance.Version != nil {
 				if torEnabled && instance.NetworkType == "tor" {
 					keys = append(keys, key)
 				} else if !torOnlyEnabled {
@@ -76,6 +77,7 @@ func index(c echo.Context) error {
 				"Tor": torEnabled,
 				"TorOnly": torOnlyEnabled,
 			},
+			"GradeComment": grade.Comment(randInstance.Html.Grade),
 		})
 	} else {
 		return c.Render(http.StatusTooEarly, "index.html", map[string]bool{

@@ -69,6 +69,24 @@ form {
 #config input[type=submit] {
 	margin-top: 20px;
 }
+
+.tooltip {
+	position: relative;
+	display: inline-block;
+}
+
+.tooltip .tooltiptext {
+	visibility: hidden;
+	text-align: center;
+	background-color: #151515;
+	position: absolute;
+	padding: 15px;
+	width: 100px;
+}
+
+.tooltip:hover .tooltiptext {
+	visibility: visible;
+}
 	</style>
 </head>
 <body>
@@ -94,9 +112,12 @@ form {
 				<input placeholder="Your query..." name="q">
 				<input type="submit" value="Search">
 			</form>
-			<i id="comments">{{.InstanceUrl}} {{range .Instance.Comments}}
+			<i id="comments"><b>{{.InstanceUrl}}</b> {{range .Instance.Comments}}
 				{{.}}
-				{{end}}Grade: {{.Instance.Html.Grade}}</i>
+				{{end}} | grade: <div class="tooltip">
+					<b>&nbsp;{{.Instance.Html.Grade}}</b></i>
+					<span class="tooltiptext">{{.GradeComment}}</span>
+				</div>
 		{{end}}
 	</span>
 </body>
