@@ -111,14 +111,12 @@ form {
 			<input name="toronly"{{if .OptionsSelected.TorOnly}}checked{{end}} type="checkbox"><br /><br />
 
 			<label for="blacklist">Blacklist <small>(separated by semicolons)</small></label><br />
-			<textarea name="blacklist">
-{{range .OptionsSelected.Blacklist}}
+			<textarea name="blacklist">{{range .OptionsSelected.Blacklist}}
 {{.}} ;
 {{else}}
 https://unwanted.instance.com/ ;
 *://another.unwanted.instance.cn/
-{{end}}
-			</textarea><br />
+{{end}}</textarea><br />
 
 			<input type="submit" value="Save"> 
 		</form>
