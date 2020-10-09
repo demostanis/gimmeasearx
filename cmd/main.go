@@ -9,6 +9,8 @@ import (
 	"github.com/demostanis/gimmeasearx/pkg/instances"
 	"html/template"
 	"math/rand"
+	"regexp"
+	"strings"
 	"io"
 	"os"
 )
@@ -53,17 +55,41 @@ func main() {
 func index(c echo.Context) error {
 	torOnlyEnabled := c.QueryParam("toronly") == "on"
 	torEnabled := torOnlyEnabled || c.QueryParam("tor") == "on"
+	blacklist := *new([]string)
+
+	if b := c.QueryParam("blacklist"); len(b) > 0 {
+		for _, s := range strings.Split(b, ";") {
+			blacklist = append(blacklist, strings.TrimSpace(s))
+		}
+	}
 
 	if fetchedInstances != nil {
 		keys := *new([]string)
 		for key, instance := range *fetchedInstances {
 			if instance.Error == nil && instance.Version != nil {
-				if torEnabled && instance.NetworkType == "tor" {
-					keys = append(keys, key)
-				} else if !torOnlyEnabled {
-					keys = append(keys, key)
+				stop := false
+				for _, blacklisted := range blacklist {
+					if len(strings.TrimSpace(blacklisted)) < 1 {
+						continue
+					}
+					if r, err := regexp.Compile(blacklisted); err == nil && r.MatchString(key) {
+						stop = true
+					}
+				}
+				if !stop {
+					if torEnabled && instance.NetworkType == "tor" {
+						keys = append(keys, key)
+					} else if !torOnlyEnabled && instance.NetworkType != "tor" {
+						keys = append(keys, key)
+					}
 				}
 			}
+		}
+
+		if len(keys) < 1 {
+			return c.Render(http.StatusExpectationFailed, "index.html", map[string]bool{
+				"Error": true,
+			})
 		}
 		randInt := rand.Intn(len(keys))
 		randUrl := keys[randInt]
@@ -76,6 +102,7 @@ func index(c echo.Context) error {
 			"OptionsSelected": map[string]interface{}{
 				"Tor": torEnabled,
 				"TorOnly": torOnlyEnabled,
+				"Blacklist": blacklist,
 			},
 			"GradeComment": grade.Comment(randInstance.Html.Grade),
 		})

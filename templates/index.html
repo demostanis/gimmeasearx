@@ -66,8 +66,19 @@ form {
 	vertical-align: -3px;
 }
 
+#config form {
+	height: 100%;
+}
+
+#config textarea {
+	width: 85%;
+	height: 30%;
+}
+
 #config input[type=submit] {
-	margin-top: 20px;
+	position: absolute;
+	bottom: 10%;
+	right: 13%;
 }
 
 .tooltip {
@@ -97,7 +108,17 @@ form {
 			<input name="tor"{{if .OptionsSelected.Tor}}checked{{end}} type="checkbox"><br />
 
 			<label for="toronly">Tor instances ONLY</label>
-			<input name="toronly"{{if .OptionsSelected.TorOnly}}checked{{end}} type="checkbox"><br />
+			<input name="toronly"{{if .OptionsSelected.TorOnly}}checked{{end}} type="checkbox"><br /><br />
+
+			<label for="blacklist">Blacklist <small>(separated by semicolons)</small></label><br />
+			<textarea name="blacklist">
+{{range .OptionsSelected.Blacklist}}
+{{.}} ;
+{{else}}
+https://unwanted.instance.com/ ;
+*://another.unwanted.instance.cn/
+{{end}}
+			</textarea><br />
 
 			<input type="submit" value="Save"> 
 		</form>
@@ -117,7 +138,7 @@ form {
 				{{end}} | grade: <div class="tooltip">
 					<b>{{.Instance.Html.Grade}}</b>
 					<span class="tooltiptext">{{.GradeComment}}</span>
-				</div></i>
+				</div> | version: {{.Instance.Version}}</i>
 		{{end}}
 	</span>
 </body>
