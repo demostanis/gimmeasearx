@@ -112,11 +112,14 @@ form {
 
 			<label for="blacklist">Blacklist <small>(separated by semicolons)</small></label><br />
 			<textarea name="blacklist">{{range .OptionsSelected.Blacklist}}
-{{.}} ;
-{{else}}
+{{.}} ;{{else}}
 https://unwanted.instance.com/ ;
-*://another.unwanted.instance.cn/
-{{end}}</textarea><br />
+*://another.unwanted.instance.cn/{{end}}</textarea><br /><br />
+
+			<label for="grades">Grades: </label>
+			{{range .Grades}}
+			<input type="checkbox" name="{{.Id}}">{{.Symbol}}
+			{{end}}
 
 			<input type="submit" value="Save"> 
 		</form>

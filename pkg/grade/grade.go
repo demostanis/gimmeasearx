@@ -1,5 +1,14 @@
 package grade
 
+func Grades() []map[string]interface{} {
+	return []map[string]interface{}{
+		{ "Symbol": "V", "Id": "grade-v", },
+		{ "Symbol": "C", "Id": "grade-c", },
+		{ "Symbol": "Cjs", "Id": "grade-cjs", },
+		{ "Symbol": "E", "Id": "grade-e", },
+	}
+}
+
 func Comment(grade string) string {
 	switch grade {
 		case "V":

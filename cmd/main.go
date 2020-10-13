@@ -105,6 +105,7 @@ func index(c echo.Context) error {
 				"Blacklist": blacklist,
 			},
 			"GradeComment": grade.Comment(randInstance.Html.Grade),
+			"Grades": grade.Grades(),
 		})
 	} else {
 		return c.Render(http.StatusTooEarly, "index.html", map[string]bool{
