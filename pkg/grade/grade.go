@@ -9,6 +9,20 @@ func Grades() []map[string]interface{} {
 	}
 }
 
+func Symbol(id string) string {
+	var result string
+	for _, thisGrade := range Grades() {
+		if thisGrade["Id"] == id {
+			result = thisGrade["Symbol"].(string)
+		}
+	}
+	return result
+}
+
+func Defaults() []string {
+	return []string{"grade-v", "grade-c"}
+}
+
 func Comment(grade string) string {
 	switch grade {
 		case "V":

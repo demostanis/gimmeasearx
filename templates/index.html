@@ -117,8 +117,9 @@ https://unwanted.instance.com/ ;
 *://another.unwanted.instance.cn/{{end}}</textarea><br /><br />
 
 			<label for="grades">Grades: </label>
-			{{range .Grades}}
-			<input type="checkbox" name="{{.Id}}">{{.Symbol}}
+			{{$selected := .GradesSelected}}
+			{{range $grade := .Grades}}
+			<input type="checkbox" name="{{.Id}}"{{range $thisGrade := $selected}}{{if eq $thisGrade $grade.Id}}checked{{end}}{{end}}>{{.Symbol}}
 			{{end}}
 
 			<input type="submit" value="Save"> 

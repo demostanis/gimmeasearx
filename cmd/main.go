@@ -55,6 +55,15 @@ func main() {
 func index(c echo.Context) error {
 	torOnlyEnabled := c.QueryParam("toronly") == "on"
 	torEnabled := torOnlyEnabled || c.QueryParam("tor") == "on"
+	gradesEnabled := *new([]string)
+	for _, thisGrade := range grade.Grades() {
+		if c.QueryParam(thisGrade["Id"].(string)) == "on" {
+			gradesEnabled = append(gradesEnabled, thisGrade["Id"].(string))
+		}
+	}
+	if len(gradesEnabled) < 1 {
+		gradesEnabled = grade.Defaults()
+	}
 	blacklist := *new([]string)
 
 	if b := c.QueryParam("blacklist"); len(b) > 0 {
@@ -68,12 +77,21 @@ func index(c echo.Context) error {
 		for key, instance := range *fetchedInstances {
 			if instance.Error == nil && instance.Version != nil {
 				stop := false
-				for _, blacklisted := range blacklist {
-					if len(strings.TrimSpace(blacklisted)) < 1 {
-						continue
-					}
-					if r, err := regexp.Compile(blacklisted); err == nil && r.MatchString(key) {
+
+				for i, thisGrade := range gradesEnabled {
+					if instance.Html.Grade != grade.Symbol(thisGrade) && len(gradesEnabled) -1 == i {
 						stop = true
+					}
+				}
+
+				if !stop {
+					for _, blacklisted := range blacklist {
+						if len(strings.TrimSpace(blacklisted)) < 1 {
+							continue
+						}
+						if r, err := regexp.Compile(blacklisted); err == nil && r.MatchString(key) {
+							stop = true
+						}
 					}
 				}
 				if !stop {
@@ -106,6 +124,7 @@ func index(c echo.Context) error {
 			},
 			"GradeComment": grade.Comment(randInstance.Html.Grade),
 			"Grades": grade.Grades(),
+			"GradesSelected": gradesEnabled,
 		})
 	} else {
 		return c.Render(http.StatusTooEarly, "index.html", map[string]bool{
