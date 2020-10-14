@@ -1,6 +1,4 @@
-## gimmeasearx
-### Find a random searx instance
----------
+# gimmeasearx
 
 Configurable, JavaScript-less Neocities alternative, written in Go!
 You can either clone, build and use it locally or use the Tor [hidden service](http://7tcuoi57curagdk7nsvmzedcxgwlrq2d6jach4ksa3vj72uxrzadmqqd.onion/).
