@@ -8,8 +8,6 @@ import (
 	"github.com/demostanis/gimmeasearx/pkg/grade"
 	"github.com/demostanis/gimmeasearx/pkg/instances"
 	"html/template"
-	"math/rand"
-	"regexp"
 	"strings"
 	"time"
 	"io"
@@ -55,6 +53,7 @@ func main() {
 	e.Use(middleware.Recover())
 
 	e.GET("/", index)
+	e.GET("/search", search)
 
 	port, exists := os.LookupEnv("PORT")
 	if !exists {
@@ -63,66 +62,42 @@ func main() {
 	e.Logger.Fatal(e.Start(port))
 }
 
-func index(c echo.Context) error {
-	torOnlyEnabled := c.QueryParam("toronly") == "on"
-	torEnabled := torOnlyEnabled || c.QueryParam("tor") == "on"
-	gradesEnabled := *new([]string)
-	for _, thisGrade := range grade.Grades() {
-		if c.QueryParam(thisGrade["Id"].(string)) == "on" {
-			gradesEnabled = append(gradesEnabled, thisGrade["Id"].(string))
-		}
-	}
-	if len(gradesEnabled) < 1 {
-		gradesEnabled = grade.Defaults()
-	}
-	blacklist := *new([]string)
+func search(c echo.Context) error {
+	params := parseParams(c)
+	torOnlyEnabled := params.torOnlyEnabled
+	torEnabled := params.torEnabled
+	gradesEnabled := params.gradesEnabled
+	blacklist := params.blacklist
 
-	if b := c.QueryParam("blacklist"); len(b) > 0 {
-		for _, s := range strings.Split(b, ";") {
-			blacklist = append(blacklist, strings.TrimSpace(s))
-		}
+	randUrl := instances.FindRandomInstance(fetchedInstances, gradesEnabled, blacklist, torEnabled, torOnlyEnabled)
+	if randUrl == nil {
+		return c.Render(http.StatusExpectationFailed, "index.html", map[string]bool{
+			"Error": true,
+		})
 	}
+
+	if fetchedInstances != nil && randUrl != nil {
+		return c.Redirect(http.StatusMovedPermanently, *randUrl + "?q=" + c.QueryParam("q"))
+	} else {
+		return c.String(http.StatusTooEarly, "No instances available. Please try again in a few seconds.")
+	}
+}
+
+func index(c echo.Context) error {
+	params := parseParams(c)
+	torOnlyEnabled := params.torOnlyEnabled
+	torEnabled := params.torEnabled
+	gradesEnabled := params.gradesEnabled
+	blacklist := params.blacklist
 
 	if fetchedInstances != nil {
-		keys := *new([]string)
-		for key, instance := range *fetchedInstances {
-			if instance.Error == nil && instance.Version != nil {
-				stop := false
-
-				for i, thisGrade := range gradesEnabled {
-					if instance.Html.Grade != grade.Symbol(thisGrade) && len(gradesEnabled) -1 == i {
-						stop = true
-					}
-				}
-
-				if !stop {
-					for _, blacklisted := range blacklist {
-						if len(strings.TrimSpace(blacklisted)) < 1 {
-							continue
-						}
-						if r, err := regexp.Compile(blacklisted); err == nil && r.MatchString(key) {
-							stop = true
-						}
-					}
-				}
-				if !stop {
-					if torEnabled && instance.NetworkType == "tor" {
-						keys = append(keys, key)
-					} else if !torOnlyEnabled && instance.NetworkType != "tor" {
-						keys = append(keys, key)
-					}
-				}
-			}
-		}
-
-		if len(keys) < 1 {
+		randUrl := instances.FindRandomInstance(fetchedInstances, gradesEnabled, blacklist, torEnabled, torOnlyEnabled)
+		if randUrl == nil {
 			return c.Render(http.StatusExpectationFailed, "index.html", map[string]bool{
 				"Error": true,
 			})
 		}
-		randInt := rand.Intn(len(keys))
-		randUrl := keys[randInt]
-		randInstance := (*fetchedInstances)[randUrl]
+		randInstance := (*fetchedInstances)[*randUrl]
 
 		return c.Render(http.StatusOK, "index.html", map[string]interface{}{
 			"CurrentUrl": c.Request().URL.RequestURI(),
@@ -141,6 +116,40 @@ func index(c echo.Context) error {
 		return c.Render(http.StatusTooEarly, "index.html", map[string]bool{
 			"Error": true,
 		})
+	}
+}
+
+type Params struct {
+	torOnlyEnabled bool
+	torEnabled bool
+	gradesEnabled []string
+	blacklist []string
+}
+
+func parseParams(c echo.Context) Params {
+	torOnlyEnabled := c.QueryParam("toronly") == "on"
+	torEnabled := torOnlyEnabled || c.QueryParam("tor") == "on"
+	gradesEnabled := *new([]string)
+	for _, thisGrade := range grade.Grades() {
+		if c.QueryParam(thisGrade["Id"].(string)) == "on" {
+			gradesEnabled = append(gradesEnabled, thisGrade["Id"].(string))
+		}
+	}
+	if len(gradesEnabled) < 1 {
+		gradesEnabled = grade.Defaults()
+	}
+	blacklist := *new([]string)
+
+	if b := c.QueryParam("blacklist"); len(b) > 0 {
+		for _, s := range strings.Split(b, ";") {
+			blacklist = append(blacklist, strings.TrimSpace(s))
+		}
+	}
+	return Params{
+		torEnabled,
+		torOnlyEnabled,
+		gradesEnabled,
+		blacklist,
 	}
 }
 

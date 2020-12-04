@@ -3,9 +3,13 @@ package instances
 import (
 	"io"
 	"fmt"
+	"github.com/demostanis/gimmeasearx/pkg/grade"
 	"io/ioutil"
 	"encoding/json"
+	"math/rand"
 	"net/http"
+	"strings"
+	"regexp"
 )
 
 type NotOKError struct {
@@ -76,3 +80,43 @@ func Fetch() (*InstancesData, error) {
 	return instances, nil
 }
 
+func FindRandomInstance(fetchedInstances *map[string]Instance, gradesEnabled []string, blacklist []string, torEnabled bool, torOnlyEnabled bool) *string {
+	keys := *new([]string)
+	for key, instance := range *fetchedInstances {
+		if instance.Error == nil && instance.Version != nil {
+			stop := false
+
+			for i, thisGrade := range gradesEnabled {
+				if instance.Html.Grade != grade.Symbol(thisGrade) && len(gradesEnabled) -1 == i {
+					stop = true
+				}
+			}
+
+			if !stop {
+				for _, blacklisted := range blacklist {
+					if len(strings.TrimSpace(blacklisted)) < 1 {
+						continue
+					}
+					if r, err := regexp.Compile(blacklisted); err == nil && r.MatchString(key) {
+						stop = true
+					}
+				}
+			}
+			if !stop {
+				if torEnabled && instance.NetworkType == "tor" {
+					keys = append(keys, key)
+				} else if !torOnlyEnabled && instance.NetworkType != "tor" {
+					keys = append(keys, key)
+				}
+			}
+		}
+	}
+
+	if len(keys) < 1 {
+		return nil
+	}
+	randInt := rand.Intn(len(keys))
+	randUrl := keys[randInt]
+
+	return &randUrl
+}
