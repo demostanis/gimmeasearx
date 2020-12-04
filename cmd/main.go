@@ -11,6 +11,7 @@ import (
 	"math/rand"
 	"regexp"
 	"strings"
+	"time"
 	"io"
 	"os"
 )
@@ -33,12 +34,22 @@ func main() {
 	e := echo.New()
 	e.Renderer = t
 
-	resp, err := instances.Fetch();
-	if err != nil {
-		fmt.Printf("Error: %s\n", err)
-		os.Exit(1)
+	var fetch func()
+	fetch = func() {
+		resp, err := instances.Fetch();
+		if err != nil {
+			fmt.Printf("Error: %s\n", err)
+			os.Exit(1)
+		}
+		fetchedInstances = &resp.Instances
 	}
-	fetchedInstances = &resp.Instances
+
+	fetch()
+	go func() {
+		for range time.Tick(time.Hour * 24) {
+			fetch()
+		}
+	}()
 
 	e.Use(middleware.Gzip())
 	e.Use(middleware.Recover())
