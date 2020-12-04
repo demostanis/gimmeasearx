@@ -68,6 +68,7 @@ func search(c echo.Context) error {
 	torEnabled := params.torEnabled
 	gradesEnabled := params.gradesEnabled
 	blacklist := params.blacklist
+	preferences := params.preferences
 
 	randUrl := instances.FindRandomInstance(fetchedInstances, gradesEnabled, blacklist, torEnabled, torOnlyEnabled)
 	if randUrl == nil {
@@ -77,7 +78,7 @@ func search(c echo.Context) error {
 	}
 
 	if fetchedInstances != nil && randUrl != nil {
-		return c.Redirect(http.StatusMovedPermanently, *randUrl + "?q=" + c.QueryParam("q"))
+		return c.Redirect(http.StatusMovedPermanently, *randUrl + "?preferences=" + *preferences + "&q=" + c.QueryParam("q"))
 	} else {
 		return c.String(http.StatusTooEarly, "No instances available. Please try again in a few seconds.")
 	}
@@ -89,6 +90,7 @@ func index(c echo.Context) error {
 	torEnabled := params.torEnabled
 	gradesEnabled := params.gradesEnabled
 	blacklist := params.blacklist
+	preferences := params.preferences
 
 	if fetchedInstances != nil {
 		randUrl := instances.FindRandomInstance(fetchedInstances, gradesEnabled, blacklist, torEnabled, torOnlyEnabled)
@@ -111,6 +113,7 @@ func index(c echo.Context) error {
 			"GradeComment": grade.Comment(randInstance.Html.Grade),
 			"Grades": grade.Grades(),
 			"GradesSelected": gradesEnabled,
+			"Preferences": preferences,
 		})
 	} else {
 		return c.Render(http.StatusTooEarly, "index.html", map[string]bool{
@@ -124,6 +127,7 @@ type Params struct {
 	torEnabled bool
 	gradesEnabled []string
 	blacklist []string
+	preferences *string
 }
 
 func parseParams(c echo.Context) Params {
@@ -145,11 +149,14 @@ func parseParams(c echo.Context) Params {
 			blacklist = append(blacklist, strings.TrimSpace(s))
 		}
 	}
+	preferences := c.QueryParam("preferences")
+
 	return Params{
 		torEnabled,
 		torOnlyEnabled,
 		gradesEnabled,
 		blacklist,
+		&preferences,
 	}
 }
 

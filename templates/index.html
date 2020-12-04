@@ -122,6 +122,10 @@ https://unwanted.instance.com/ ;
 			<input type="checkbox" name="{{.Id}}"{{range $thisGrade := $selected}}{{if eq $thisGrade $grade.Id}}checked{{end}}{{end}}>{{.Symbol}}
 			{{end}}
 
+			<br /><br />
+			<label for="preferences">Custom SearX preferences: </label>
+			<input type="text" name="preferences" {{if .Preferences}}value="{{.Preferences}}"{{end}}>
+
 			<input type="submit" value="Save"> 
 		</form>
 	</div>
@@ -133,6 +137,7 @@ https://unwanted.instance.com/ ;
 		{{else}}
 			<form action="{{.InstanceUrl}}">
 				<input placeholder="Your query..." name="q">
+				<input name="preferences" value="{{.Preferences}}" hidden>
 				<input type="submit" value="Search">
 			</form>
 			<i id="comments"><b>{{.InstanceUrl}}</b> {{range .Instance.Comments}}
