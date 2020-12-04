@@ -2,7 +2,7 @@
 
 Configurable, JavaScript-less Neocities alternative, written in Go!
 It gives you a random searx (privacy-respecting metasearch engine) instance each time you visit the page.
-You can either clone, build and use it locally using techniques below or use the Tor [hidden service](http://7tcuoi57curagdk7nsvmzedcxgwlrq2d6jach4ksa3vj72uxrzadmqqd.onion/).
+You can either clone, build and use it locally using techniques below or use the Tor [hidden service](http://7tcuoi57curagdk7nsvmzedcxgwlrq2d6jach4ksa3vj72uxrzadmqqd.onion/). There's also [a wiki](https://github.com/demostanis/gimmeasearx/wiki)!
 
 ![screenshot](screenshots/1.png)
 
