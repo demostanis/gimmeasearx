@@ -80,34 +80,36 @@ func Fetch() (*InstancesData, error) {
 	return instances, nil
 }
 
+func containsGrade(arr []string, elem string) bool {
+	for _, a := range arr {
+		if grade.Symbol(a) == elem {
+			return true
+		}
+	}
+	return false
+}
+
 func FindRandomInstance(fetchedInstances *map[string]Instance, gradesEnabled []string, blacklist []string, torEnabled bool, torOnlyEnabled bool) *string {
 	keys := *new([]string)
-	for key, instance := range *fetchedInstances {
+	LOOP: for key, instance := range *fetchedInstances {
 		if instance.Error == nil && instance.Version != nil {
-			stop := false
+			if !containsGrade(gradesEnabled, instance.Html.Grade) {
+				continue LOOP
+			}
 
-			for i, thisGrade := range gradesEnabled {
-				if instance.Html.Grade != grade.Symbol(thisGrade) && len(gradesEnabled) -1 == i {
-					stop = true
+			for _, blacklisted := range blacklist {
+				if len(strings.TrimSpace(blacklisted)) < 1 {
+					continue
+				}
+				if r, err := regexp.Compile(blacklisted); err == nil && r.MatchString(key) {
+					continue LOOP
 				}
 			}
 
-			if !stop {
-				for _, blacklisted := range blacklist {
-					if len(strings.TrimSpace(blacklisted)) < 1 {
-						continue
-					}
-					if r, err := regexp.Compile(blacklisted); err == nil && r.MatchString(key) {
-						stop = true
-					}
-				}
-			}
-			if !stop {
-				if torEnabled && instance.NetworkType == "tor" {
-					keys = append(keys, key)
-				} else if !torOnlyEnabled && instance.NetworkType != "tor" {
-					keys = append(keys, key)
-				}
+			if torEnabled && instance.NetworkType == "tor" {
+				keys = append(keys, key)
+			} else if !torOnlyEnabled && instance.NetworkType != "tor" {
+				keys = append(keys, key)
 			}
 		}
 	}

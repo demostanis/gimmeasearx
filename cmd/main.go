@@ -77,7 +77,7 @@ func search(c echo.Context) error {
 		})
 	}
 
-	if fetchedInstances != nil && randUrl != nil {
+	if fetchedInstances != nil {
 		return c.Redirect(http.StatusMovedPermanently, *randUrl + "?preferences=" + *preferences + "&q=" + c.QueryParam("q"))
 	} else {
 		return c.String(http.StatusTooEarly, "No instances available. Please try again in a few seconds.")
