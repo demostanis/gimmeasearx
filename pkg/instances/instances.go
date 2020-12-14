@@ -56,6 +56,29 @@ func InstancesNew(data io.ReadCloser) (*InstancesData, error) {
 	return &instances, nil
 }
 
+func VerifyInstance(url string, instance Instance) bool {
+	result := false
+	// We need other tests
+	tests := map[string][]string{
+		"south+park": []string{"Trey Parker", "Matt Stone"},
+	}
+	TESTS: for search, matches := range tests {
+		resp, err := http.Get(url + "/search?q=" + search)
+		if err == nil && resp != nil {
+			page, _ := ioutil.ReadAll(resp.Body)
+			for _, regex := range matches {
+				if err == nil {
+					r := regexp.MustCompile(regex)
+					result = r.MatchString(string(page))
+					continue TESTS
+				}
+			}
+			resp.Body.Close()
+		}
+	}
+	return result
+}
+
 var InstancesApiUrl = "https://searx.space/data/instances.json"
 
 func Fetch() (*InstancesData, error) {

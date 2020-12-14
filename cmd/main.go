@@ -40,6 +40,13 @@ func main() {
 			os.Exit(1)
 		}
 		fetchedInstances = &resp.Instances
+		go func() {
+			for key, instance := range *fetchedInstances {
+				if instances.VerifyInstance(key, instance) {
+					delete(*fetchedInstances, key)
+				}
+			}
+		}()
 	}
 
 	fetch()

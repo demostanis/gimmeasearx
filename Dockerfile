@@ -1,4 +1,4 @@
-FROM golang:1.13-buster as builder
+FROM docker.io/golang:1.13-buster as builder
 RUN mkdir /build 
 ADD . /build/
 WORKDIR /build 
