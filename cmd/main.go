@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/demostanis/gimmeasearx/pkg/grade"
@@ -85,7 +86,7 @@ func search(c echo.Context) error {
 	}
 
 	if fetchedInstances != nil {
-		return c.Redirect(http.StatusMovedPermanently, *randUrl + "?preferences=" + *preferences + "&q=" + c.QueryParam("q"))
+		return c.Redirect(http.StatusMovedPermanently, *randUrl + "?preferences=" + url.QueryEscape(*preferences) + "&q=" + url.QueryEscape(c.QueryParam("q")))
 	} else {
 		return c.String(http.StatusTooEarly, "No instances available. Please try again in a few seconds.")
 	}
