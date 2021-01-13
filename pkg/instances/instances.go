@@ -62,16 +62,13 @@ func VerifyInstance(url string, instance Instance) bool {
 	tests := map[string][]string{
 		"south+park": []string{"Trey Parker", "Matt Stone"},
 	}
-	TESTS: for search, matches := range tests {
+	for search, matches := range tests {
 		resp, err := http.Get(url + "/search?q=" + search)
 		if err == nil && resp != nil {
 			page, _ := ioutil.ReadAll(resp.Body)
 			for _, regex := range matches {
-				if err == nil {
-					r := regexp.MustCompile(regex)
-					result = r.MatchString(string(page))
-					continue TESTS
-				}
+				r := regexp.MustCompile(regex)
+				result = r.MatchString(string(page))
 			}
 			resp.Body.Close()
 		}
