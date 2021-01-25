@@ -66,6 +66,10 @@ func VerifyInstance(url string, instance Instance) bool {
 	for search, matches := range tests {
 		resp, err := http.Get(url + "/search?q=" + search)
 		if err == nil && resp != nil {
+			if resp.Header.Get("server") == "cloudflare" {
+				result = false
+				continue
+			}
 			page, _ := ioutil.ReadAll(resp.Body)
 			for _, regex := range matches {
 				r := regexp.MustCompile(regex)
