@@ -98,6 +98,10 @@ form {
 .tooltip:hover .tooltiptext {
 	visibility: visible;
 }
+
+input[name=minversion] {
+	margin-right: 3px;
+}
 	</style>
 </head>
 <body>
@@ -125,6 +129,12 @@ https://unwanted.instance.com/ ;
 			<br /><br />
 			<label for="preferences">Custom SearX preferences: </label>
 			<input type="text" name="preferences" {{if .Preferences}}value="{{.Preferences}}"{{end}}>
+
+			<br /><br />
+			<label for="minversion">Minimum version: </label>
+			<input type="text" name="minversion" {{if .MinVersion}}value="{{.MinVersion}}"{{end}}>
+			OR
+			<input name="latestversion"{{if .OptionsSelected.Latest}}checked{{end}} type="checkbox">latest
 
 			<input type="submit" value="Save"> 
 		</form>

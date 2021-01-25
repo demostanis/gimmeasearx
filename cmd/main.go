@@ -8,6 +8,8 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/demostanis/gimmeasearx/pkg/grade"
 	"github.com/demostanis/gimmeasearx/pkg/instances"
+	"github.com/demostanis/gimmeasearx/pkg/version"
+	"github.com/hashicorp/go-version"
 	"html/template"
 	"strings"
 	"time"
@@ -77,8 +79,9 @@ func search(c echo.Context) error {
 	gradesEnabled := params.gradesEnabled
 	blacklist := params.blacklist
 	preferences := params.preferences
+	minVersion := params.minVersion
 
-	randUrl := instances.FindRandomInstance(fetchedInstances, gradesEnabled, blacklist, torEnabled, torOnlyEnabled)
+	randUrl := instances.FindRandomInstance(fetchedInstances, gradesEnabled, blacklist, torEnabled, torOnlyEnabled, minVersion)
 	if randUrl == nil {
 		return c.Render(http.StatusExpectationFailed, "index.html", map[string]bool{
 			"Error": true,
@@ -99,34 +102,39 @@ func index(c echo.Context) error {
 	gradesEnabled := params.gradesEnabled
 	blacklist := params.blacklist
 	preferences := params.preferences
+	minVersion := params.minVersion
+	latestVersion := params.latestVersion
+
+	data := map[string]interface{}{
+		"CurrentUrl": c.Request().URL.RequestURI(),
+		"OptionsSelected": map[string]interface{}{
+			"Tor": torEnabled,
+			"TorOnly": torOnlyEnabled,
+			"Blacklist": blacklist,
+			"Latest": latestVersion,
+		},
+		"Grades": grade.Grades(),
+		"GradesSelected": gradesEnabled,
+		"Preferences": preferences,
+		"MinVersion": minVersion.Original(),
+	}
 
 	if fetchedInstances != nil {
-		randUrl := instances.FindRandomInstance(fetchedInstances, gradesEnabled, blacklist, torEnabled, torOnlyEnabled)
+		randUrl := instances.FindRandomInstance(fetchedInstances, gradesEnabled, blacklist, torEnabled, torOnlyEnabled, minVersion)
 		if randUrl == nil {
-			return c.Render(http.StatusExpectationFailed, "index.html", map[string]bool{
-				"Error": true,
-			})
+			data["Error"] = true
+			return c.Render(http.StatusExpectationFailed, "index.html", data)
 		}
 		randInstance := (*fetchedInstances)[*randUrl]
 
-		return c.Render(http.StatusOK, "index.html", map[string]interface{}{
-			"CurrentUrl": c.Request().URL.RequestURI(),
-			"Instance": randInstance,
-			"InstanceUrl": randUrl,
-			"OptionsSelected": map[string]interface{}{
-				"Tor": torEnabled,
-				"TorOnly": torOnlyEnabled,
-				"Blacklist": blacklist,
-			},
-			"GradeComment": grade.Comment(randInstance.Html.Grade),
-			"Grades": grade.Grades(),
-			"GradesSelected": gradesEnabled,
-			"Preferences": preferences,
-		})
+		data["Instance"] = randInstance
+		data["InstanceUrl"] = randUrl
+		data["GradeComment"] = grade.Comment(randInstance.Html.Grade)
+
+		return c.Render(http.StatusOK, "index.html", data)
 	} else {
-		return c.Render(http.StatusTooEarly, "index.html", map[string]bool{
-			"Error": true,
-		})
+		data["Error"] = true
+		return c.Render(http.StatusTooEarly, "index.html", data)
 	}
 }
 
@@ -136,12 +144,27 @@ type Params struct {
 	gradesEnabled []string
 	blacklist []string
 	preferences *string
+	minVersion version.Version
+	latestVersion bool
 }
 
 func parseParams(c echo.Context) Params {
 	torOnlyEnabled := c.QueryParam("toronly") == "on"
 	torEnabled := torOnlyEnabled || c.QueryParam("tor") == "on"
+	latestVersion := c.QueryParam("latestversion") == "on"
+	minVersion, _ := version.NewVersion("0.0.0")
+	if !latestVersion {
+		r, err := version.NewVersion(c.QueryParam("minversion"))
+		if err != nil {
+			minVersion, _ = version.NewVersion("0.0.0")
+		} else {
+			minVersion = r
+		}
+	} else {
+		minVersion, _ = version.NewVersion(findlatestversion.Searx())
+	}
 	gradesEnabled := *new([]string)
+
 	for _, thisGrade := range grade.Grades() {
 		if c.QueryParam(thisGrade["Id"].(string)) == "on" {
 			gradesEnabled = append(gradesEnabled, thisGrade["Id"].(string))
@@ -165,6 +188,8 @@ func parseParams(c echo.Context) Params {
 		gradesEnabled,
 		blacklist,
 		&preferences,
+		*minVersion,
+		latestVersion,
 	}
 }
 

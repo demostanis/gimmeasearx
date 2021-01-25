@@ -30,8 +30,8 @@ $ go build -o gimmeasearx ./cmd/main.go
 # cp gimmeasearx /usr/local/bin
 # cp openrc-service /etc/init.d/gimmeasearx
 ```
-edit the service file and change `cd` to the directory where the template directory is located.
-You can also change the port by the `PORT` environment variable.
+edit the service file and `cd` to the directory where the template directory is located.
+You can also change the port via the `PORT` environment variable.
 The docker instance should be up and running. You can access it via [localhost:8080](http://localhost:8080).
 
 Licensed under GPLv3.

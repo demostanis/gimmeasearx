@@ -4,6 +4,7 @@ import (
 	"io"
 	"fmt"
 	"github.com/demostanis/gimmeasearx/pkg/grade"
+	"github.com/hashicorp/go-version"
 	"io/ioutil"
 	"encoding/json"
 	"math/rand"
@@ -109,7 +110,7 @@ func containsGrade(arr []string, elem string) bool {
 	return false
 }
 
-func FindRandomInstance(fetchedInstances *map[string]Instance, gradesEnabled []string, blacklist []string, torEnabled bool, torOnlyEnabled bool) *string {
+func FindRandomInstance(fetchedInstances *map[string]Instance, gradesEnabled []string, blacklist []string, torEnabled bool, torOnlyEnabled bool, minVersion version.Version) *string {
 	keys := *new([]string)
 	LOOP: for key, instance := range *fetchedInstances {
 		if instance.Error == nil && instance.Version != nil {
@@ -124,6 +125,11 @@ func FindRandomInstance(fetchedInstances *map[string]Instance, gradesEnabled []s
 				if r, err := regexp.Compile(blacklisted); err == nil && r.MatchString(key) {
 					continue LOOP
 				}
+			}
+
+			version, err := version.NewVersion(*instance.Version)
+			if err == nil && minVersion.GreaterThan(version) {
+				continue LOOP
 			}
 
 			if torEnabled && instance.NetworkType == "tor" {
