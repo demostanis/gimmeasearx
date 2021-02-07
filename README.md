@@ -4,7 +4,7 @@ Configurable, JavaScript-less Neocities alternative, written in Go!
 It gives you a random searx (privacy-respecting metasearch engine) instance each time you visit the page.
 You can either clone, build and use it locally using techniques below or use the Tor [hidden service](http://7tcuoi57curagdk7nsvmzedcxgwlrq2d6jach4ksa3vj72uxrzadmqqd.onion/). There's also [a wiki](https://github.com/demostanis/gimmeasearx/wiki)!
 
-![screenshot](screenshots/1.png)
+![screenshot](screenshots/2.png)
 
 ## Running with Go
 You will need `git` and `go`. Once setup, run the following commands:
@@ -13,6 +13,7 @@ git clone https://github.com/demostanis/gimmeasearx.git
 go run cmd/main.go
 ```
 That's it! Open up a browser and check [localhost:8080](http://localhost:8080).
+If you want .onion instances to show up, you need Tor installed and running.
 
 ## Running with Docker or Podman
 
