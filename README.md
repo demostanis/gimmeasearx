@@ -13,6 +13,7 @@ git clone https://github.com/demostanis/gimmeasearx.git
 go run cmd/main.go
 ```
 That's it! Open up a browser and check [localhost:8080](http://localhost:8080).
+
 If you want .onion instances to show up, you need Tor installed and running.
 
 ## Running with Docker or Podman
@@ -36,3 +37,11 @@ You can also change the port via the `PORT` environment variable.
 The docker instance should be up and running. You can access it via [localhost:8080](http://localhost:8080).
 
 Licensed under GPLv3.
+
+If my time spent coding this was helpful to you,
+I'd be gladful to receive donations:
+
+- Ethereum: **0xF239e7C7b1C75EFF467EE4b74CEB4002E3d00BEE**
+
+- Bitcoin: **5cc720fb7ca0bf0807e0223946fae738**
+
