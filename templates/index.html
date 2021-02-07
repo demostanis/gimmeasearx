@@ -54,16 +54,13 @@ form {
 	width: 30%;
 	padding: 15px;
 	text-align: center;
+	overflow-y: scroll;
 }
 
 #config button {
 	border: none;
 	background: none;
 	padding: 0;
-}
-
-#config input[type=checkbox] {
-	vertical-align: -3px;
 }
 
 #config form {
@@ -75,10 +72,16 @@ form {
 	height: 30%;
 }
 
+#config input[type=checkbox] {
+	vertical-align: -3px;
+}
+
 #config input[type=submit] {
-	position: absolute;
-	bottom: 10%;
-	right: 13%;
+	transform: translate(50%, 30%);
+}
+
+#config input[name=minversion] {
+	margin-right: 3px;
 }
 
 .tooltip {
@@ -98,10 +101,6 @@ form {
 .tooltip:hover .tooltiptext {
 	visibility: visible;
 }
-
-input[name=minversion] {
-	margin-right: 3px;
-}
 	</style>
 </head>
 <body>
@@ -112,14 +111,16 @@ input[name=minversion] {
 			<input name="tor"{{if .OptionsSelected.Tor}}checked{{end}} type="checkbox"><br />
 
 			<label for="toronly">Tor instances ONLY</label>
-			<input name="toronly"{{if .OptionsSelected.TorOnly}}checked{{end}} type="checkbox"><br /><br />
+			<input name="toronly"{{if .OptionsSelected.TorOnly}}checked{{end}} type="checkbox">
 
+			<br /><br />
 			<label for="blacklist">Blacklist <small>(separated by semicolons)</small></label><br />
 			<textarea name="blacklist">{{range .OptionsSelected.Blacklist}}
 {{.}} ;{{else}}
 https://unwanted.instance.com/ ;
-*://another.unwanted.instance.cn/{{end}}</textarea><br /><br />
+*://another.unwanted.instance.cn/{{end}}</textarea>
 
+			<br /><br />
 			<label for="grades">Grades: </label>
 			{{$selected := .GradesSelected}}
 			{{range $grade := .Grades}}
@@ -134,9 +135,17 @@ https://unwanted.instance.com/ ;
 			<label for="minversion">Minimum version: </label>
 			<input type="text" name="minversion" {{if .MinVersion}}value="{{.MinVersion}}"{{end}}>
 			OR
-			<input name="latestversion"{{if .OptionsSelected.Latest}}checked{{end}} type="checkbox">latest
+			<span><input name="latestversion"{{if .OptionsSelected.Latest}}checked{{end}} type="checkbox">latest</span>
+			
+			<br /><br />
+			<label for="custominstances">Custom instances <small>(separated by semicolons)</small></label><br />
+			<textarea name="custominstances">{{range .CustomInstances}}
+{{.}} ;{{else}}
+https://mycustom.searx.instance/ ;
+https://myothercustom.instan.ce.ru.fr.es/{{end}}</textarea><br /><br />
 
 			<input type="submit" value="Save"> 
+			<br /><br /><br /><br />
 		</form>
 	</div>
 	<span id="main">
@@ -152,10 +161,10 @@ https://unwanted.instance.com/ ;
 			</form>
 			<i id="comments"><b>{{.InstanceUrl}}</b> {{range .Instance.Comments}}
 				{{.}}
-				{{end}} | grade: <div class="tooltip">
+				{{end}}{{if .Instance.Html}}| grade: <div class="tooltip">
 					<b>{{.Instance.Html.Grade}}</b>
-					<span class="tooltiptext">{{.GradeComment}}</span>
-				</div> | version: {{.Instance.Version}}</i>
+					<span class="tooltiptext">{{.GradeComment}}</span>{{end}}
+				</div> {{if .Instance.Version}}| version: {{.Instance.Version}}</i>{{end}}
 		{{end}}
 	</span>
 </body>

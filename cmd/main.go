@@ -43,13 +43,13 @@ func main() {
 			os.Exit(1)
 		}
 		fetchedInstances = &resp.Instances
-		go func() {
-			for key, instance := range *fetchedInstances {
+		for key, instance := range *fetchedInstances {
+			go func(key string, instance instances.Instance) {
 				if instances.VerifyInstance(key, instance) {
 					delete(*fetchedInstances, key)
 				}
-			}
-		}()
+			}(key, instance)
+		}
 	}
 
 	fetch()
@@ -80,8 +80,9 @@ func search(c echo.Context) error {
 	blacklist := params.blacklist
 	preferences := params.preferences
 	minVersion := params.minVersion
+	customInstances := params.customInstances
 
-	randUrl := instances.FindRandomInstance(fetchedInstances, gradesEnabled, blacklist, torEnabled, torOnlyEnabled, minVersion)
+	randUrl, _ := instances.FindRandomInstance(fetchedInstances, gradesEnabled, blacklist, torEnabled, torOnlyEnabled, minVersion, customInstances)
 	if randUrl == nil {
 		return c.Render(http.StatusExpectationFailed, "index.html", map[string]bool{
 			"Error": true,
@@ -104,6 +105,7 @@ func index(c echo.Context) error {
 	preferences := params.preferences
 	minVersion := params.minVersion
 	latestVersion := params.latestVersion
+	customInstances := params.customInstances
 
 	data := map[string]interface{}{
 		"CurrentUrl": c.Request().URL.RequestURI(),
@@ -117,19 +119,25 @@ func index(c echo.Context) error {
 		"GradesSelected": gradesEnabled,
 		"Preferences": preferences,
 		"MinVersion": minVersion.Original(),
+		"CustomInstances": customInstances,
 	}
 
 	if fetchedInstances != nil {
-		randUrl := instances.FindRandomInstance(fetchedInstances, gradesEnabled, blacklist, torEnabled, torOnlyEnabled, minVersion)
+		randUrl, isCustom := instances.FindRandomInstance(fetchedInstances, gradesEnabled, blacklist, torEnabled, torOnlyEnabled, minVersion, customInstances)
 		if randUrl == nil {
 			data["Error"] = true
 			return c.Render(http.StatusExpectationFailed, "index.html", data)
 		}
-		randInstance := (*fetchedInstances)[*randUrl]
+		if isCustom {
+			data["Instance"] = instances.Instance{Comments: []string{"Custom instance"}}
+			data["InstanceUrl"] = randUrl
+		} else {
+			randInstance := (*fetchedInstances)[*randUrl]
 
-		data["Instance"] = randInstance
-		data["InstanceUrl"] = randUrl
-		data["GradeComment"] = grade.Comment(randInstance.Html.Grade)
+			data["Instance"] = randInstance
+			data["InstanceUrl"] = randUrl
+			data["GradeComment"] = grade.Comment(randInstance.Html.Grade)
+		}
 
 		return c.Render(http.StatusOK, "index.html", data)
 	} else {
@@ -139,13 +147,14 @@ func index(c echo.Context) error {
 }
 
 type Params struct {
-	torOnlyEnabled bool
 	torEnabled bool
+	torOnlyEnabled bool
 	gradesEnabled []string
 	blacklist []string
 	preferences *string
 	minVersion version.Version
 	latestVersion bool
+	customInstances []string
 }
 
 func parseParams(c echo.Context) Params {
@@ -173,13 +182,25 @@ func parseParams(c echo.Context) Params {
 	if len(gradesEnabled) < 1 {
 		gradesEnabled = grade.Defaults()
 	}
-	blacklist := *new([]string)
 
+	blacklist := *new([]string)
 	if b := c.QueryParam("blacklist"); len(b) > 0 {
 		for _, s := range strings.Split(b, ";") {
-			blacklist = append(blacklist, strings.TrimSpace(s))
+			if strings.TrimSpace(s) != "" {
+				blacklist = append(blacklist, strings.TrimSpace(s))
+			}
 		}
 	}
+
+	customInstances := *new([]string)
+	if b := c.QueryParam("custominstances"); len(b) > 0 {
+		for _, s := range strings.Split(b, ";") {
+			if strings.TrimSpace(s) != "" && strings.TrimSpace(s) != "https://myothercustom.instan.ce.ru.fr.es/" && strings.TrimSpace(s) != "https://mycustom.searx.instance/" {
+				customInstances = append(customInstances, strings.TrimSpace(s))
+			}
+		}
+	}
+
 	preferences := c.QueryParam("preferences")
 
 	return Params{
@@ -190,6 +211,7 @@ func parseParams(c echo.Context) Params {
 		&preferences,
 		*minVersion,
 		latestVersion,
+		customInstances,
 	}
 }
 

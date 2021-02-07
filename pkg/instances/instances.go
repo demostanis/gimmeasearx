@@ -3,12 +3,16 @@ package instances
 import (
 	"io"
 	"fmt"
+	"net"
+	"errors"
+	"strconv"
 	"github.com/demostanis/gimmeasearx/pkg/grade"
 	"github.com/hashicorp/go-version"
 	"io/ioutil"
 	"encoding/json"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"strings"
 	"regexp"
 )
@@ -36,10 +40,10 @@ type InstancesData struct {
 }
 type Instance struct {
 	Comments []string `json:"comments"`
-	NetworkType string `json:"network_type"`
+	NetworkType *string `json:"network_type"`
 	Error *string `json:"error,omit_empty"`
 	Version *string `json:"version"`
-	Html struct {
+	Html *struct {
 		Resources struct {} `json:"ressources"`
 		Grade string `json:"grade"`
 	} `json:"html,omit_empty"`
@@ -57,14 +61,46 @@ func InstancesNew(data io.ReadCloser) (*InstancesData, error) {
 	return &instances, nil
 }
 
-func VerifyInstance(url string, instance Instance) bool {
+func TorListening() (int, error) {
+	_, err := net.Dial("tcp", ":9050")
+	if err != nil {
+		_, err2 := net.Dial("tcp", ":9150")
+		if err2 != nil {
+			return 0, errors.New("Tor is not listening")
+		} else {
+			return 9150, nil
+		}
+	} else {
+		return 9050, nil
+	}
+}
+
+func VerifyInstance(instanceUrl string, instance Instance) bool {
 	result := false
+	useTor := false
 	// We need other tests
 	tests := map[string][]string{
 		"south+park": []string{"Trey Parker", "Matt Stone"},
 	}
+	port, err := TorListening()
+	if strings.HasSuffix(instanceUrl, ".onion/") && err == nil {
+		useTor = true
+	}
 	for search, matches := range tests {
-		resp, err := http.Get(url + "/search?q=" + search)
+		var resp *http.Response
+		var err error
+		if useTor {
+			req, _ := http.NewRequest("GET", instanceUrl, nil)
+			tr := &http.Transport{
+				Proxy: func(req *http.Request) (*url.URL, error) {
+					return url.Parse("socks5://127.0.0.1:" + strconv.Itoa(port))
+				},
+			}
+			client := &http.Client{Transport: tr}
+			resp, err = client.Do(req)
+		} else {
+			resp, err = http.Get(instanceUrl + "search?q=" + search)
+		}
 		if err == nil && resp != nil {
 			if resp.Header.Get("server") == "cloudflare" {
 				result = false
@@ -114,11 +150,11 @@ func containsGrade(arr []string, elem string) bool {
 	return false
 }
 
-func FindRandomInstance(fetchedInstances *map[string]Instance, gradesEnabled []string, blacklist []string, torEnabled bool, torOnlyEnabled bool, minVersion version.Version) *string {
+func FindRandomInstance(fetchedInstances *map[string]Instance, gradesEnabled []string, blacklist []string, torEnabled bool, torOnlyEnabled bool, minVersion version.Version, customInstances []string) (*string, bool) {
 	keys := *new([]string)
 	LOOP: for key, instance := range *fetchedInstances {
 		if instance.Error == nil && instance.Version != nil {
-			if !containsGrade(gradesEnabled, instance.Html.Grade) {
+			if !containsGrade(gradesEnabled, (*instance.Html).Grade) {
 				continue LOOP
 			}
 
@@ -136,19 +172,30 @@ func FindRandomInstance(fetchedInstances *map[string]Instance, gradesEnabled []s
 				continue LOOP
 			}
 
-			if torEnabled && instance.NetworkType == "tor" {
+			if torEnabled && *instance.NetworkType == "tor" {
 				keys = append(keys, key)
-			} else if !torOnlyEnabled && instance.NetworkType != "tor" {
+			} else if !torOnlyEnabled && *instance.NetworkType != "tor" {
 				keys = append(keys, key)
 			}
 		}
 	}
+	for _, customInstance := range customInstances {
+		keys = append(keys, customInstance)
+	}
 
 	if len(keys) < 1 {
-		return nil
+		return nil, false
 	}
 	randInt := rand.Intn(len(keys))
 	randUrl := keys[randInt]
 
-	return &randUrl
+	isCustom := false
+	for _, customInstance := range customInstances {
+		if randUrl == customInstance {
+			isCustom = true
+			break
+		}
+	}
+
+	return &randUrl, isCustom
 }
