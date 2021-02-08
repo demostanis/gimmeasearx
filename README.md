@@ -43,6 +43,7 @@ $ go build gimmeasearx.go
 $ sed -i "s|TEMPLATE_DIR|$PWD|" services/systemd/gimmeasearx.service
 # cp gimmeasearx /usr/bin
 # cp services/systemd/gimmeasearx.service /usr/lib/systemd/system
+# systemctl enable --now gimmeasearx
 ```
 The instance should be up and running. You can access it via [localhost:8080](http://localhost:8080).
 
