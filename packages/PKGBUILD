@@ -1,4 +1,5 @@
-# vim:set ft=sh:
+# Maintainer: demostanis worlds <demostanis at protonmail dot com>
+
 _pkgname="gimmeasearx"
 pkgname="$_pkgname-git"
 pkgver="2.0.0"
@@ -35,4 +36,6 @@ EOF
 	install -Dm 755 $_pkgname/$_pkgname "$pkgdir"/var/lib/$_pkgname/$_pkgname
 	install -t "$pkgdir"/var/lib/$_pkgname/templates -Dm 644 $_pkgname/templates/*
 }
+
+# vim:set ft=sh:
 
