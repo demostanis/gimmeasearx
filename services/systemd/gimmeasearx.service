@@ -1,0 +1,16 @@
+[Unit]
+Description=Launch gimmeasearx
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+User=nobody
+Group=nobody
+WorkingDirectory=TEMPLATE_DIR
+ExecStart=/usr/bin/gimmeasearx
+Restart=Always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+

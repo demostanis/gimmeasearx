@@ -29,13 +29,22 @@ The docker instance should be up and running. You can access it via [localhost:8
 
 ```
 $ go build gimmeasearx.go
-$ sed -i "s|TEMPLATE_DIR|$PWD|" services/openrc-service
+$ sed -i "s|TEMPLATE_DIR|$PWD|" services/openrc/openrc-service
 # cp gimmeasearx /usr/local/bin
-# cp services/openrc-service /etc/init.d/gimmeasearx
+# cp services/openrc/openrc-service /etc/init.d/gimmeasearx
 ```
-Edit the service file and `cd` to the directory where the template directory is located.
-You can also change the port via the `PORT` environment variable.
-The docker instance should be up and running. You can access it via [localhost:8080](http://localhost:8080).
+You can change the port via the `PORT` environment variable.
+The instance should be up and running. You can access it via [localhost:8080](http://localhost:8080).
+
+## Running with systemd
+
+```
+$ go build gimmeasearx.go
+$ sed -i "s|TEMPLATE_DIR|$PWD|" services/systemd/gimmeasearx.service
+# cp gimmeasearx /usr/bin
+# cp services/systemd/gimmeasearx.service /usr/lib/systemd/system
+```
+The instance should be up and running. You can access it via [localhost:8080](http://localhost:8080).
 
 Licensed under GPLv3.
 
