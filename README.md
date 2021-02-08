@@ -6,7 +6,7 @@ You can either clone, build and use it locally using techniques below or use the
 
 ![screenshot](screenshots/2.png)
 
-## Running with Go
+## Running
 You will need `git` and `go`. Once setup, run the following commands:
 ```sh
 git clone https://github.com/demostanis/gimmeasearx.git
@@ -16,36 +16,9 @@ That's it! Open up a browser and check [localhost:8080](http://localhost:8080).
 
 If you want .onion instances to show up, you need [Tor](https://www.torproject.org/) installed and running.
 
-## Running with Docker or Podman
+For more ways to run gimmeasearx, such as with Docker or through a systemd service, check the [wiki page](https://github.com/demostanis/gimmeasearx/wiki/Running).
 
-```sh
-docker build -t gimmeasearx .
-docker run --name gimmesearx -d -ti -p 8080:8080 gimmeasearx
-```
-
-The docker instance should be up and running. You can access it via [localhost:8080](http://localhost:8080).
-
-## Running as openrc-service
-
-```
-$ go build gimmeasearx.go
-$ sed -i "s|TEMPLATE_DIR|$PWD|" services/openrc/openrc-service
-# cp gimmeasearx /usr/local/bin
-# cp services/openrc/openrc-service /etc/init.d/gimmeasearx
-```
-You can change the port via the `PORT` environment variable.
-The instance should be up and running. You can access it via [localhost:8080](http://localhost:8080).
-
-## Running with systemd
-
-```
-$ go build gimmeasearx.go
-$ sed -i "s|TEMPLATE_DIR|$PWD|" services/systemd/gimmeasearx.service
-# cp gimmeasearx /usr/bin
-# cp services/systemd/gimmeasearx.service /usr/lib/systemd/system
-# systemctl enable --now gimmeasearx
-```
-The instance should be up and running. You can access it via [localhost:8080](http://localhost:8080).
+--------
 
 Licensed under GPLv3.
 
