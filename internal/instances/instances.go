@@ -2,11 +2,10 @@ package instances
 
 import (
 	"io"
-	"fmt"
 	"net"
 	"errors"
 	"strconv"
-	"github.com/demostanis/gimmeasearx/pkg/grade"
+	"github.com/demostanis/gimmeasearx/internal/grade"
 	"github.com/hashicorp/go-version"
 	"io/ioutil"
 	"encoding/json"
@@ -16,24 +15,6 @@ import (
 	"strings"
 	"regexp"
 )
-
-type NotOKError struct {
-	status string
-}
-
-func (err *NotOKError) Error() string {
-	return err.status
-}
-
-type FetchError struct {
-	Reason error
-	Url string
-}
-
-func (err *FetchError) Error() string {
-	return fmt.Sprintf("Failed to fetch resource at URL %s: %s",
-		err.Url, err.Reason)
-}
 
 type InstancesData struct {
 	Instances map[string]Instance `json:"instances"`
@@ -75,7 +56,7 @@ func TorListening() (int, error) {
 	}
 }
 
-func VerifyInstance(instanceUrl string, instance Instance) bool {
+func Verify(instanceUrl string, instance Instance) bool {
 	result := false
 	useTor := false
 	// We need other tests
@@ -117,23 +98,15 @@ func VerifyInstance(instanceUrl string, instance Instance) bool {
 	return result
 }
 
-var InstancesApiUrl = "https://searx.space/data/instances.json"
-
 func Fetch() (*InstancesData, error) {
-	resp, err := http.Get(InstancesApiUrl)
+	resp, err := http.Get("https://searx.space/data/instances.json")
+	defer resp.Body.Close()
 	if err != nil {
-		return nil, &FetchError{
-			err,
-			InstancesApiUrl,
-		}
+		return nil, err
 	}
 	if resp.StatusCode != 200 {
-		return nil, &FetchError{
-			&NotOKError{resp.Status},
-			InstancesApiUrl,
-		}
+		return nil, err
 	}
-	defer resp.Body.Close()
 	instances, err := InstancesNew(resp.Body)
 	if err != nil {
 		return nil, err

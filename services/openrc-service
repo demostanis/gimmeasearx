@@ -2,7 +2,7 @@
 description="gimmeasearx - Find a random searx instance"
 PORT=':8080'
 export PORT
-cd 'Path where template is located'
+cd 'TEMPLATE_DIR'
 pidfile="/run/${RC_SVCNAME}.pid"
 command='/usr/local/bin/gimmeasearx'
 command_user=nobody

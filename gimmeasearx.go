@@ -6,9 +6,9 @@ import (
 	"net/url"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/demostanis/gimmeasearx/pkg/grade"
-	"github.com/demostanis/gimmeasearx/pkg/instances"
-	"github.com/demostanis/gimmeasearx/pkg/version"
+	"github.com/demostanis/gimmeasearx/internal/grade"
+	"github.com/demostanis/gimmeasearx/internal/instances"
+	findlatestversion "github.com/demostanis/gimmeasearx/internal/version"
 	"github.com/hashicorp/go-version"
 	"html/template"
 	"strings"
@@ -45,7 +45,7 @@ func main() {
 		fetchedInstances = &resp.Instances
 		for key, instance := range *fetchedInstances {
 			go func(key string, instance instances.Instance) {
-				if instances.VerifyInstance(key, instance) {
+				if instances.Verify(key, instance) {
 					delete(*fetchedInstances, key)
 				}
 			}(key, instance)

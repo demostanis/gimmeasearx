@@ -10,11 +10,11 @@ You can either clone, build and use it locally using techniques below or use the
 You will need `git` and `go`. Once setup, run the following commands:
 ```sh
 git clone https://github.com/demostanis/gimmeasearx.git
-go run cmd/main.go
+go run gimmeasearx.go 
 ```
 That's it! Open up a browser and check [localhost:8080](http://localhost:8080).
 
-If you want .onion instances to show up, you need Tor installed and running.
+If you want .onion instances to show up, you need [Tor](https://www.torproject.org/) installed and running.
 
 ## Running with Docker or Podman
 
@@ -28,11 +28,12 @@ The docker instance should be up and running. You can access it via [localhost:8
 ## Running as openrc-service
 
 ```
-$ go build -o gimmeasearx ./cmd/main.go
+$ go build gimmeasearx.go
+$ sed -i "s|TEMPLATE_DIR|$PWD|" services/openrc-service
 # cp gimmeasearx /usr/local/bin
-# cp openrc-service /etc/init.d/gimmeasearx
+# cp services/openrc-service /etc/init.d/gimmeasearx
 ```
-edit the service file and `cd` to the directory where the template directory is located.
+Edit the service file and `cd` to the directory where the template directory is located.
 You can also change the port via the `PORT` environment variable.
 The docker instance should be up and running. You can access it via [localhost:8080](http://localhost:8080).
 
