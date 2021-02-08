@@ -17,10 +17,12 @@ import (
 	"os"
 )
 
+// Used by echo.
 type Template struct {
 	templates *template.Template
 }
 
+// Used by echo to render templates.
 func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	return t.templates.ExecuteTemplate(w, name, data)
 }
