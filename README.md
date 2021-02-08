@@ -16,7 +16,7 @@ That's it! Open up a browser and check [localhost:8080](http://localhost:8080).
 
 If you want .onion instances to show up, you need [Tor](https://www.torproject.org/) installed and running.
 
-For more ways to run gimmeasearx, such as with Docker or through a systemd service, check the [wiki page](https://github.com/demostanis/gimmeasearx/wiki/Running).
+For more ways to run gimmeasearx, such as with Docker or through a systemd service, check the [wiki page](https://github.com/demostanis/gimmeasearx/wiki/Installing-&-Running).
 
 --------
 
