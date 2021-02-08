@@ -9,6 +9,7 @@ import (
 // Sucky regex, but it works
 var r = regexp.MustCompile("tag/v(.*)\"")
 
+// Returns SearX's latest version.
 func Searx() string {
 	resp, err := http.Get("https://github.com/searx/searx/releases")
 	if err != nil {

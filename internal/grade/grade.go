@@ -1,5 +1,7 @@
 package grade
 
+// Returns an array of grade IDs and
+// their corresponding symbol.
 func Grades() []map[string]interface{} {
 	return []map[string]interface{}{
 		{ "Symbol": "V", "Id": "grade-v", },
@@ -9,6 +11,7 @@ func Grades() []map[string]interface{} {
 	}
 }
 
+// Finds a grade ID's symbol.
 func Symbol(id string) string {
 	var result string
 	for _, thisGrade := range Grades() {
@@ -19,10 +22,13 @@ func Symbol(id string) string {
 	return result
 }
 
+// Default grades for people whom haven't set them.
 func Defaults() []string {
 	return []string{"grade-v", "grade-c"}
 }
 
+// Returns a grade's comment which will be
+// shown in a tooltip.
 func Comment(grade string) string {
 	switch grade {
 		case "V":

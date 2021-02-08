@@ -16,9 +16,12 @@ import (
 	"regexp"
 )
 
+// The data fetched from searx.space.
 type InstancesData struct {
 	Instances map[string]Instance `json:"instances"`
 }
+// Struct representing an instance
+// in the data fetched.
 type Instance struct {
 	Comments []string `json:"comments"`
 	NetworkType *string `json:"network_type"`
@@ -30,6 +33,7 @@ type Instance struct {
 	} `json:"html,omit_empty"`
 }
 
+// Creates an InstancesData from the fetched JSON data.
 func InstancesNew(data io.ReadCloser) (*InstancesData, error) {
 	var instances InstancesData
 	resp, err := ioutil.ReadAll(data)
@@ -42,6 +46,7 @@ func InstancesNew(data io.ReadCloser) (*InstancesData, error) {
 	return &instances, nil
 }
 
+// Checks whether tor is listening on :9050 or :9150.
 func TorListening() (int, error) {
 	_, err := net.Dial("tcp", ":9050")
 	if err != nil {
@@ -56,12 +61,16 @@ func TorListening() (int, error) {
 	}
 }
 
+// Verifies an instance, using tor or not, by checking if it
+// returns expected results from searches. It also removes
+// instances using Cloudflare.
 func Verify(instanceUrl string, instance Instance) bool {
 	result := false
 	useTor := false
 	// We need other tests
 	tests := map[string][]string{
 		"south+park": []string{"Trey Parker", "Matt Stone"},
+		"gimmeasearx": []string{"demostanis", "reddit"},
 	}
 	port, err := TorListening()
 	if strings.HasSuffix(instanceUrl, ".onion/") && err == nil {
@@ -98,6 +107,7 @@ func Verify(instanceUrl string, instance Instance) bool {
 	return result
 }
 
+// Fetches data from searx.space.
 func Fetch() (*InstancesData, error) {
 	resp, err := http.Get("https://searx.space/data/instances.json")
 	defer resp.Body.Close()
@@ -123,6 +133,8 @@ func containsGrade(arr []string, elem string) bool {
 	return false
 }
 
+// Finds a random instance between the ones fetched according
+// to user's choosen options.
 func FindRandomInstance(fetchedInstances *map[string]Instance, gradesEnabled []string, blacklist []string, torEnabled bool, torOnlyEnabled bool, minVersion version.Version, customInstances []string) (*string, bool) {
 	keys := *new([]string)
 	LOOP: for key, instance := range *fetchedInstances {
@@ -172,3 +184,4 @@ func FindRandomInstance(fetchedInstances *map[string]Instance, gradesEnabled []s
 
 	return &randUrl, isCustom
 }
+

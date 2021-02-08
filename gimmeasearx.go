@@ -146,6 +146,7 @@ func index(c echo.Context) error {
 	}
 }
 
+// Params that may be specified in the URL.
 type Params struct {
 	torEnabled bool
 	torOnlyEnabled bool
