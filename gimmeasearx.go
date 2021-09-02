@@ -66,6 +66,7 @@ func main() {
 
 	e.GET("/", index)
 	e.GET("/search", search)
+	e.File("/opensearch.xml", "opensearch.xml")
 
 	port, exists := os.LookupEnv("PORT")
 	if !exists {
