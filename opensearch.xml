@@ -4,4 +4,5 @@
 <Description>Search SearX</Description>
 <InputEncoding>UTF-8</InputEncoding>
 <LongName>SearX using gimmeasearx</LongName>
-<Url type="text/html" method="get" template="https://gimmeasearx.com/search?q={searchTerms}"/></OpenSearchDescription>
+<Url type="text/html" method="get" template="http://localhost:8080/search?q={searchTerms}"/>
+</OpenSearchDescription>
