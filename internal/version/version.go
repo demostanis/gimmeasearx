@@ -7,7 +7,7 @@ import (
 )
 
 // Sucky regex, but it works
-var r = regexp.MustCompile("tag/v(.*)\"")
+var r = regexp.MustCompile("tag/(.*?)\"")
 
 // Returns SearX's latest version.
 func Searx() string {
