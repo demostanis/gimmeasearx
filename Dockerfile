@@ -6,5 +6,6 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflag
 FROM gcr.io/distroless/base-debian10
 COPY --from=builder /build/main /app/
 COPY --from=builder /build/templates /app/templates
+COPY opensearch.xml /app/opensearch.xml
 WORKDIR /app
 CMD ["./main"]
