@@ -16,6 +16,8 @@ import (
 	"regexp"
 )
 
+const USER_AGENT =  "Mozilla/5.0 (gimmeasearx; https://github.com/demostanis/gimmeasearx; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36 I am nice, I promise."
+
 // The data fetched from searx.space.
 type InstancesData struct {
 	Instances map[string]Instance `json:"instances"`
@@ -70,7 +72,7 @@ func Verify(instanceUrl string, instance Instance) bool {
 	// We need other tests
 	tests := map[string][]string{
 		"south+park": []string{"Trey Parker", "Matt Stone"},
-		"gimmeasearx": []string{"demostanis", "reddit"},
+		"gimmeasearx": []string{"Find a random searx instance"},
 	}
 	port, err := TorListening()
 	if strings.HasSuffix(instanceUrl, ".onion/") && err == nil {
@@ -80,7 +82,11 @@ func Verify(instanceUrl string, instance Instance) bool {
 		var resp *http.Response
 		var err error
 		if useTor {
-			req, _ := http.NewRequest("GET", instanceUrl, nil)
+			req, _ := http.NewRequest("GET", instanceUrl + "search?q=" + search, nil)
+			req.Header.Set("User-Agent", USER_AGENT)
+			req.Header.Set("Accept-Language", "en-US,en;q=0.5")
+			req.Header.Set("Connection", "keep")
+
 			tr := &http.Transport{
 				Proxy: func(req *http.Request) (*url.URL, error) {
 					return url.Parse("socks5://127.0.0.1:" + strconv.Itoa(port))
@@ -89,7 +95,15 @@ func Verify(instanceUrl string, instance Instance) bool {
 			client := &http.Client{Transport: tr}
 			resp, err = client.Do(req)
 		} else {
-			resp, err = http.Get(instanceUrl + "search?q=" + search)
+			req, _ := http.NewRequest("GET", instanceUrl + "search?q=" + search, nil)
+			// These headers are mostly to circumvent filtron.
+			// Please don't hate me for bypassing your anti rooboots.
+			req.Header.Set("User-Agent", USER_AGENT)
+			req.Header.Set("Accept-Language", "en-US,en;q=0.5")
+			req.Header.Set("Connection", "keep")
+
+			client := &http.Client{}
+			resp, err = client.Do(req)
 		}
 		if err == nil && resp != nil {
 			if resp.Header.Get("server") == "cloudflare" {
@@ -100,6 +114,9 @@ func Verify(instanceUrl string, instance Instance) bool {
 			for _, regex := range matches {
 				r := regexp.MustCompile(regex)
 				result = r.MatchString(string(page))
+				if !result {
+					return result
+				}
 			}
 			resp.Body.Close()
 		}
