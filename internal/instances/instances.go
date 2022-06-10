@@ -85,7 +85,6 @@ func Verify(instanceUrl string, instance Instance) bool {
 			req, _ := http.NewRequest("GET", instanceUrl + "search?q=" + search, nil)
 			req.Header.Set("User-Agent", USER_AGENT)
 			req.Header.Set("Accept-Language", "en-US,en;q=0.5")
-			req.Header.Set("Connection", "keep")
 
 			tr := &http.Transport{
 				Proxy: func(req *http.Request) (*url.URL, error) {
@@ -100,7 +99,6 @@ func Verify(instanceUrl string, instance Instance) bool {
 			// Please don't hate me for bypassing your anti rooboots.
 			req.Header.Set("User-Agent", USER_AGENT)
 			req.Header.Set("Accept-Language", "en-US,en;q=0.5")
-			req.Header.Set("Connection", "keep")
 
 			client := &http.Client{}
 			resp, err = client.Do(req)
@@ -114,6 +112,8 @@ func Verify(instanceUrl string, instance Instance) bool {
 			for _, regex := range matches {
 				r := regexp.MustCompile(regex)
 				result = r.MatchString(string(page))
+
+				// Do not make any other test if one fails
 				if !result {
 					return result
 				}

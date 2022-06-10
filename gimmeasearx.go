@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sync"
 	"net/http"
 	"net/url"
 	"github.com/labstack/echo/v4"
@@ -45,10 +46,14 @@ func main() {
 			os.Exit(1)
 		}
 		fetchedInstances = &resp.Instances
+		var mutex = &sync.Mutex{}
 		for key, instance := range *fetchedInstances {
 			go func(key string, instance instances.Instance) {
-				if instances.Verify(key, instance) {
+				result := instances.Verify(key, instance)
+				if !result {
+					mutex.Lock()
 					delete(*fetchedInstances, key)
+					mutex.Unlock()
 				}
 			}(key, instance)
 		}
