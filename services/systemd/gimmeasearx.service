@@ -4,12 +4,11 @@ Requires=network-online.target
 After=network-online.target
 
 [Service]
-User=nobody
-Group=nobody
+DynamicUser=yes
 Environment=PORT=8080
 WorkingDirectory=TEMPLATE_DIR
 ExecStart=/usr/bin/gimmeasearx
-Restart=Always
+Restart=always
 RestartSec=5
 
 [Install]
