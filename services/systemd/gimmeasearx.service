@@ -6,6 +6,7 @@ After=network-online.target
 [Service]
 User=nobody
 Group=nobody
+Environment=PORT=8080
 WorkingDirectory=TEMPLATE_DIR
 ExecStart=/usr/bin/gimmeasearx
 Restart=Always
