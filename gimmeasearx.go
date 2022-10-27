@@ -77,7 +77,11 @@ func main() {
 	if !exists {
 		port = ":8080"
 	}
-	e.Logger.Fatal(e.Start(port))
+	host, exists := os.LookupEnv("HOST")
+	if !exists {
+		host = "localhost"
+	}
+	e.Logger.Fatal(e.Start(host + port))
 }
 
 func search(c echo.Context) error {
