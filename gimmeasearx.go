@@ -2,20 +2,20 @@ package main
 
 import (
 	"fmt"
-	"sync"
-	"net/http"
-	"net/url"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/demostanis/gimmeasearx/internal/grade"
 	"github.com/demostanis/gimmeasearx/internal/instances"
 	findlatestversion "github.com/demostanis/gimmeasearx/internal/version"
 	"github.com/hashicorp/go-version"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"html/template"
-	"strings"
-	"time"
 	"io"
+	"net/http"
+	"net/url"
 	"os"
+	"strings"
+	"sync"
+	"time"
 )
 
 // Used by echo.
@@ -40,7 +40,7 @@ func main() {
 
 	var fetch func()
 	fetch = func() {
-		resp, err := instances.Fetch();
+		resp, err := instances.Fetch()
 		if err != nil {
 			fmt.Printf("Error: %s\n", err)
 			os.Exit(1)
@@ -91,6 +91,7 @@ func search(c echo.Context) error {
 	gradesEnabled := params.gradesEnabled
 	blacklist := params.blacklist
 	preferences := params.preferences
+	queryParams := params.params
 	minVersion := params.minVersion
 	customInstances := params.customInstances
 
@@ -102,7 +103,17 @@ func search(c echo.Context) error {
 	}
 
 	if fetchedInstances != nil {
-		return c.Redirect(http.StatusFound, *randUrl + "?preferences=" + url.QueryEscape(*preferences) + "&q=" + url.QueryEscape(c.QueryParam("q")))
+		finalUrl := *randUrl
+		finalUrl += url.QueryEscape(c.QueryParam("q"))
+		if preferences != nil {
+			finalUrl += url.QueryEscape(*preferences)
+		}
+		if len(queryParams) > 0 {
+			for _, param := range queryParams {
+				finalUrl += "&" + param.Name + "=" + param.Value
+			}
+		}
+		return c.Redirect(http.StatusFound, finalUrl)
 	} else {
 		return c.String(http.StatusTooEarly, "No instances available. Please try again in a few seconds.")
 	}
@@ -115,22 +126,33 @@ func index(c echo.Context) error {
 	gradesEnabled := params.gradesEnabled
 	blacklist := params.blacklist
 	preferences := params.preferences
+	queryParams := params.params
 	minVersion := params.minVersion
 	latestVersion := params.latestVersion
 	customInstances := params.customInstances
 
+	queryParamsRaw := ""
+	for i, param := range queryParams {
+		if i != 0 {
+			queryParamsRaw += "&"
+		}
+		queryParamsRaw += fmt.Sprintf("%s=%s", param.Name, param.Value)
+	}
+
 	data := map[string]interface{}{
 		"CurrentUrl": c.Request().URL.RequestURI(),
 		"OptionsSelected": map[string]interface{}{
-			"Tor": torEnabled,
-			"TorOnly": torOnlyEnabled,
+			"Tor":       torEnabled,
+			"TorOnly":   torOnlyEnabled,
 			"Blacklist": blacklist,
-			"Latest": latestVersion,
+			"Latest":    latestVersion,
 		},
-		"Grades": grade.Grades(),
-		"GradesSelected": gradesEnabled,
-		"Preferences": preferences,
-		"MinVersion": minVersion.Original(),
+		"Grades":          grade.Grades(),
+		"GradesSelected":  gradesEnabled,
+		"Preferences":     preferences,
+		"Params":          queryParams,
+		"ParamsRaw":       queryParamsRaw,
+		"MinVersion":      minVersion.Original(),
 		"CustomInstances": customInstances,
 	}
 
@@ -158,15 +180,21 @@ func index(c echo.Context) error {
 	}
 }
 
+type queryParam struct {
+	Name  string
+	Value string
+}
+
 // Params that may be specified in the URL.
 type Params struct {
-	torEnabled bool
-	torOnlyEnabled bool
-	gradesEnabled []string
-	blacklist []string
-	preferences *string
-	minVersion version.Version
-	latestVersion bool
+	torEnabled      bool
+	torOnlyEnabled  bool
+	gradesEnabled   []string
+	blacklist       []string
+	preferences     *string
+	params          []queryParam
+	minVersion      version.Version
+	latestVersion   bool
 	customInstances []string
 }
 
@@ -214,6 +242,21 @@ func parseParams(c echo.Context) Params {
 		}
 	}
 
+	queryParams := *new([]queryParam)
+	if p := c.QueryParam("params"); len(p) > 0 {
+		query, err := url.QueryUnescape(p)
+		if err == nil {
+			values, err := url.ParseQuery(query)
+			if err == nil {
+				for name, value := range values {
+					queryParams = append(queryParams, queryParam{
+						name, value[0],
+					})
+				}
+			}
+		}
+	}
+
 	preferences := c.QueryParam("preferences")
 
 	return Params{
@@ -222,9 +265,9 @@ func parseParams(c echo.Context) Params {
 		gradesEnabled,
 		blacklist,
 		&preferences,
+		queryParams,
 		*minVersion,
 		latestVersion,
 		customInstances,
 	}
 }
-

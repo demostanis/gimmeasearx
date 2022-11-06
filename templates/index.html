@@ -133,6 +133,10 @@ https://unwanted.instance.com/ ;
 			<input type="text" name="preferences" {{if .Preferences}}value="{{.Preferences}}"{{end}}>
 
 			<br /><br />
+			<label for="preferences">Custom SearX query parameters: </label>
+			<input type="text" name="params" {{if .ParamsRaw}}value="{{.ParamsRaw}}"{{end}}>
+
+			<br /><br />
 			<label for="minversion">Minimum version: </label>
 			<input type="text" name="minversion" {{if .MinVersion}}value="{{.MinVersion}}"{{end}}>
 			OR
@@ -158,6 +162,9 @@ https://myothercustom.instan.ce.ru.fr.es/{{end}}</textarea><br /><br />
 			<form action="{{.InstanceUrl}}">
 				<input placeholder="Your query..." name="q">
 				<input name="preferences" value="{{.Preferences}}" hidden>
+				{{range .Params}}
+					<input name="{{.Name}}" value="{{.Value}}" hidden>
+				{{end}}
 				<input type="submit" value="Search">
 			</form>
 			<i id="comments"><b>{{.InstanceUrl}}</b> {{range .Instance.Comments}}
