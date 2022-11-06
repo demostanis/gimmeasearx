@@ -85,9 +85,17 @@ form {
 	margin-right: 3px;
 }
 
+.hoverable {
+	cursor: help;
+}
+
 .tooltip {
 	position: relative;
 	display: inline-block;
+}
+
+.tooltipleft .tooltiptext {
+	translate: -105%;
 }
 
 .tooltip .tooltiptext {
@@ -130,10 +138,21 @@ https://unwanted.instance.com/ ;
 
 			<br /><br />
 			<label for="preferences">Custom SearX preferences: </label>
+			<div class="tooltip tooltipleft">
+				<b class="hoverable">?</b>
+				<span class="tooltiptext">Additional preferences string to send alongside the query.
+					It can be found in a SearX instance under Preferences>Cookies, after <i>?preferences=</i>.</span>
+			</div>
 			<input type="text" name="preferences" {{if .Preferences}}value="{{.Preferences}}"{{end}}>
 
 			<br /><br />
 			<label for="preferences">Custom SearX query parameters: </label>
+			<div class="tooltip tooltipleft">
+				<b class="hoverable">?</b>
+				<span class="tooltiptext">Additional parameters that will be added to the URL,
+					of the form <i>key=value&other_key=value</i>.
+					They can be found in a SearX instance under Preferences>Cookies.</span>
+			</div>
 			<input type="text" name="params" {{if .ParamsRaw}}value="{{.ParamsRaw}}"{{end}}>
 
 			<br /><br />
@@ -170,7 +189,7 @@ https://myothercustom.instan.ce.ru.fr.es/{{end}}</textarea><br /><br />
 			<i id="comments"><b>{{.InstanceUrl}}</b> {{range .Instance.Comments}}
 				{{.}}
 				{{end}}{{if .Instance.Html}}| grade: <div class="tooltip">
-					<b>{{.Instance.Html.Grade}}</b>
+					<b class="hoverable">{{.Instance.Html.Grade}}</b>
 					<span class="tooltiptext">{{.GradeComment}}</span>{{end}}
 				</div> {{if .Instance.Version}}| version: {{.Instance.Version}}</i>{{end}}
 		{{end}}
