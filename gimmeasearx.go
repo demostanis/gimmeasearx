@@ -104,9 +104,9 @@ func search(c echo.Context) error {
 
 	if fetchedInstances != nil {
 		finalUrl := *randUrl
-		finalUrl += url.QueryEscape(c.QueryParam("q"))
-		if preferences != nil {
-			finalUrl += url.QueryEscape(*preferences)
+		finalUrl += "?q=" + url.QueryEscape(c.QueryParam("q"))
+		if len(preferences) > 0 {
+			finalUrl += "&preferences=" + url.QueryEscape(preferences)
 		}
 		if len(queryParams) > 0 {
 			for _, param := range queryParams {
@@ -191,7 +191,7 @@ type Params struct {
 	torOnlyEnabled  bool
 	gradesEnabled   []string
 	blacklist       []string
-	preferences     *string
+	preferences     string
 	params          []queryParam
 	minVersion      version.Version
 	latestVersion   bool
@@ -264,7 +264,7 @@ func parseParams(c echo.Context) Params {
 		torOnlyEnabled,
 		gradesEnabled,
 		blacklist,
-		&preferences,
+		preferences,
 		queryParams,
 		*minVersion,
 		latestVersion,
